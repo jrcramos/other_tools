@@ -1,0 +1,14 @@
+docker system prune -a --volumes
+
+
+wsl --shutdown
+taskkill /f /im com.docker.backend.exe
+taskkill /f /im Docker Desktop.exe
+wsl -l -v
+
+diskpart
+select vdisk file="C:\Users\darkthanos\AppData\Local\Docker\wsl\disk\docker_data.vhdx"
+attach vdisk readonly
+compact vdisk
+detach vdisk
+exit
