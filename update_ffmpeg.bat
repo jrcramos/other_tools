@@ -1,35 +1,41 @@
 @echo off
+chcp 65001 >nul
 setlocal enabledelayedexpansion
 
-:: Configuration
-set "PARENT_DIR=C:\ffmpeg"
-set "TEMP_DIR=%TEMP%\ffmpeg_update"
+:: Configuration - Install directly inside portable .\bin\ folder
+set "SCRIPT_DIR=%~dp0"
+set "PARENT_DIR=%SCRIPT_DIR%bin"
+set "TEMP_DIR=%TEMP%\ffmpeg_update_%RANDOM%"
 set "ZIP_URL=https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z"
 set "ZIP_FILE=%TEMP_DIR%\ffmpeg.7z"
 
-echo ============================================
-echo       FFmpeg Git-Build Multi-Updater
-echo ============================================
+echo ========================================================
+echo       FFmpeg Git-Build Portable Updater / Installer
+echo ========================================================
+echo [*] Target Directory: %PARENT_DIR%
 echo.
 
-:: Create a clean temp directory
+:: Ensure destination bin directory exists
+if not exist "%PARENT_DIR%" mkdir "%PARENT_DIR%"
+
+:: Create clean temp directory
 if exist "%TEMP_DIR%" rmdir /s /q "%TEMP_DIR%"
 mkdir "%TEMP_DIR%"
 
-:: 1. Download the latest release .7z using PowerShell (Progress hidden for speed)
-echo [*] Downloading latest FFmpeg .7z package...
+:: 1. Download the latest release .7z using PowerShell
+echo [*] Downloading latest FFmpeg .7z package from Gyan.dev...
 powershell -Command "$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%ZIP_URL%' -OutFile '%ZIP_FILE%'"
 if %ERRORLEVEL% neq 0 (
     echo [X] Error: Download failed.
     goto cleanup
 )
 
-:: 2. Download a portable 7za.exe helper to extract the .7z archive natively
-echo [*] Fetching extraction helper...
+:: 2. Download portable 7za.exe helper to extract the .7z archive natively
+echo [*] Fetching 7z extraction helper...
 powershell -Command "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri 'https://www.7-zip.org/a/7zr.exe' -OutFile '%TEMP_DIR%\7zr.exe'"
 
 :: 3. Extract the .7z package
-echo [*] Extracting .7z package contents...
+echo [*] Extracting FFmpeg package contents...
 "%TEMP_DIR%\7zr.exe" x "%ZIP_FILE%" -o"%TEMP_DIR%" -y > nul
 if %ERRORLEVEL% neq 0 (
     echo [X] Error: Extraction failed.
@@ -47,34 +53,22 @@ if "%EXTRACTED_ROOT%"=="" (
     goto cleanup
 )
 
-:: 5. Safely swap /bin, /presets, and /doc
-echo [*] Syncing folders to %PARENT_DIR%...
-
-:: Update /bin
+:: 5. Copy binaries directly into .\bin\ for zero-config portability
+echo [*] Installing binaries to %PARENT_DIR%...
 if exist "%EXTRACTED_ROOT%\bin" (
-    echo     - Updating bin...
+    xcopy "%EXTRACTED_ROOT%\bin\*" "%PARENT_DIR%\" /Y /Q >nul
     if not exist "%PARENT_DIR%\bin" mkdir "%PARENT_DIR%\bin"
-    xcopy "%EXTRACTED_ROOT%\bin\*" "%PARENT_DIR%\bin\" /Y /Q
-)
-
-:: Update /presets
-if exist "%EXTRACTED_ROOT%\presets" (
-    echo     - Updating presets...
-    if not exist "%PARENT_DIR%\presets" mkdir "%PARENT_DIR%\presets"
-    xcopy "%EXTRACTED_ROOT%\presets\*" "%PARENT_DIR%\presets\" /Y /Q
-)
-
-:: Update /doc
-if exist "%EXTRACTED_ROOT%\doc" (
-    echo     - Updating doc...
-    if not exist "%PARENT_DIR%\doc" mkdir "%PARENT_DIR%\doc"
-    xcopy "%EXTRACTED_ROOT%\doc\*" "%PARENT_DIR%\doc\" /Y /Q
+    xcopy "%EXTRACTED_ROOT%\bin\*" "%PARENT_DIR%\bin\" /Y /Q >nul
 )
 
 echo.
-echo [^!] FFmpeg components updated successfully. New version info:
+echo [^!] FFmpeg components installed successfully. Version info:
 echo ----------------------------------------------------
-"%PARENT_DIR%\bin\ffmpeg.exe" -version | findstr /B "ffmpeg version"
+if exist "%PARENT_DIR%\ffmpeg.exe" (
+    "%PARENT_DIR%\ffmpeg.exe" -version | findstr /B "ffmpeg version"
+) else if exist "%PARENT_DIR%\bin\ffmpeg.exe" (
+    "%PARENT_DIR%\bin\ffmpeg.exe" -version | findstr /B "ffmpeg version"
+)
 echo ----------------------------------------------------
 
 :cleanup

@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large binary executables and archives (auto-installed via updaters)
+bin/
+*.exe
+*.dll
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# User private configs, cookies & sessions
+cookies/
+cookies.txt
+*.cookie
+config.json
+
+# Output logs and temporary files
+*.log
+join_list.txt
+temp/
+tmp/
+scratch/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/

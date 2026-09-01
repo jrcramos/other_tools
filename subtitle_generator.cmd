@@ -22,24 +22,31 @@ set "python=C:\Users\joao3\AppData\Local\Programs\Python\Python312\python.exe"
 :: END CONFIGURATION SECTION
 :: ========================================================================
 
-:: Auto-detect ffmpeg & ffprobe if not found at configured location
-if not exist "%ffmpeg%" (
-    echo INFO: ffmpeg not found at "%ffmpeg%"
-    echo Attempting to auto-detect ffmpeg...
-    
+:: Auto-detect ffmpeg & ffprobe (prioritizing portable .\bin\)
+if exist "%scriptDir%bin\ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%bin\ffmpeg.exe"
+    set "ffprobe=%scriptDir%bin\ffprobe.exe"
+) else if exist "%scriptDir%bin\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%bin\ffmpeg\bin\ffmpeg.exe"
+    set "ffprobe=%scriptDir%bin\ffmpeg\bin\ffprobe.exe"
+) else if exist "%scriptDir%ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%ffmpeg.exe"
+    set "ffprobe=%scriptDir%ffprobe.exe"
+) else if exist "C:\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpeg=C:\ffmpeg\bin\ffmpeg.exe"
+    set "ffprobe=C:\ffmpeg\bin\ffprobe.exe"
+) else (
     where ffmpeg >nul 2>&1
     if errorlevel 1 (
         if exist "C:\Program Files\ffmpeg\bin\ffmpeg.exe" (
             set "ffmpeg=C:\Program Files\ffmpeg\bin\ffmpeg.exe"
             set "ffprobe=C:\Program Files\ffmpeg\bin\ffprobe.exe"
-            echo SUCCESS: Found ffmpeg at C:\Program Files\ffmpeg\bin\ffmpeg.exe
         ) else if exist "%USERPROFILE%\ffmpeg\bin\ffmpeg.exe" (
             set "ffmpeg=%USERPROFILE%\ffmpeg\bin\ffmpeg.exe"
             set "ffprobe=%USERPROFILE%\ffmpeg\bin\ffprobe.exe"
-            echo SUCCESS: Found ffmpeg at %USERPROFILE%\ffmpeg\bin\ffmpeg.exe
         ) else (
             echo ERROR: ffmpeg not found!
-            echo Please install ffmpeg or update the path in this script.
+            echo Please install ffmpeg or run update_ffmpeg.bat.
             pause
             exit /b
         )

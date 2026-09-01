@@ -28,12 +28,15 @@ if sys.platform == "win32":
 
 def find_binary(name, extra_paths=None):
     """Find location of an executable binary."""
+    root_dir = os.path.dirname(os.path.abspath(__file__))
     search_dirs = [
+        os.path.join(root_dir, "bin"),
+        os.path.join(root_dir, "bin", "ffmpeg", "bin"),
+        root_dir,
         r"C:\ffmpeg\bin",
         r"C:\Program Files\ffmpeg\bin",
         os.path.expanduser(r"~\ffmpeg\bin"),
         os.path.expanduser(r"~\Videos\yt-dlp-master"),
-        os.path.dirname(os.path.abspath(__file__)),
         r"C:\tools",
     ]
     if extra_paths:
@@ -211,7 +214,7 @@ def run_ytdlp(url, referer=None, custom_name=None, env=None):
         "--all-subs",
         "-o", template,
         "--hls-prefer-native",
-        "-f", "bestvideo+bestaudio/best",
+        "-f", "bestvideo+bestaudio/best/b",
         "--remux-video", "mp4"
     ]
 

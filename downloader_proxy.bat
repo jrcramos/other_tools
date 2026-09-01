@@ -46,18 +46,29 @@ if "!refererUrl!"=="" (
 )
 
 :: --- CONFIGURATION ---
-set "ytDlp=C:\Users\joao3\Videos\yt-dlp-master"
-set "cookies=C:\Users\joao3\Videos\yt-dlp-master"
+set "scriptDir=%~dp0"
 set "saveLocation=C:\Users\joao3\Videos"
-set "ffmpeg=C:\ffmpeg"
+if exist "%scriptDir%config_manager.py" (
+    for /f "delims=" %%D in ('python "%scriptDir%config_manager.py" --get-download-dir 2^>nul') do (
+        if not "%%D"=="" set "saveLocation=%%D"
+    )
+)
+set "cookies=C:\Users\joao3\Videos\yt-dlp-master"
+if exist "%scriptDir%cookies" set "cookies=%scriptDir%cookies"
 
 :: Define your SOCKS5 proxy here
 set "myProxy=socks5://pvetbwz00882:lsp3hmupkzzu@lis.socks.privado.io:1080"
 :: ---------------------
 
-:: Auto-detect yt-dlp executable
-set "ytDlpExe=!ytDlp!\yt-dlp.exe"
-if not exist "!ytDlpExe!" (
+:: Auto-detect yt-dlp executable (prioritizing portable .\bin\)
+set "ytDlpExe="
+if exist "%scriptDir%bin\yt-dlp.exe" (
+    set "ytDlpExe=%scriptDir%bin\yt-dlp.exe"
+) else if exist "%scriptDir%yt-dlp.exe" (
+    set "ytDlpExe=%scriptDir%yt-dlp.exe"
+) else if exist "C:\Users\joao3\Videos\yt-dlp-master\yt-dlp.exe" (
+    set "ytDlpExe=C:\Users\joao3\Videos\yt-dlp-master\yt-dlp.exe"
+) else (
     where yt-dlp >nul 2>&1
     if !errorlevel! equ 0 (
         set "ytDlpExe=yt-dlp"
@@ -66,14 +77,23 @@ if not exist "!ytDlpExe!" (
     )
 )
 
-:: Auto-detect ffmpeg
-set "ffmpegLoc=!ffmpeg!\bin"
-if not exist "!ffmpegLoc!\ffmpeg.exe" (
-    if exist "C:\Program Files\ffmpeg\bin\ffmpeg.exe" (
-        set "ffmpegLoc=C:\Program Files\ffmpeg\bin"
-    ) else if exist "%USERPROFILE%\ffmpeg\bin\ffmpeg.exe" (
-        set "ffmpegLoc=%USERPROFILE%\ffmpeg\bin"
-    )
+:: Auto-detect ffmpeg (prioritizing portable .\bin\)
+set "ffmpegLoc="
+if exist "%scriptDir%bin\ffmpeg.exe" (
+    set "ffmpegLoc=%scriptDir%bin"
+) else if exist "%scriptDir%bin\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpegLoc=%scriptDir%bin\ffmpeg\bin"
+) else if exist "%scriptDir%ffmpeg.exe" (
+    set "ffmpegLoc=%scriptDir%"
+) else if exist "C:\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpegLoc=C:\ffmpeg\bin"
+) else if exist "C:\Program Files\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpegLoc=C:\Program Files\ffmpeg\bin"
+) else if exist "%USERPROFILE%\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpegLoc=%USERPROFILE%\ffmpeg\bin"
+) else (
+    where ffmpeg >nul 2>&1
+    if !errorlevel! equ 0 set "ffmpegLoc="
 )
 
 :: Set output filename template

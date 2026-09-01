@@ -117,7 +117,9 @@ def check_streamlink():
 
 
 def main():
-    target_dir = r"C:\ffmpeg\bin" if os.path.exists(r"C:\ffmpeg") or os.path.exists(r"C:\ffmpeg\bin") else os.path.dirname(os.path.abspath(__file__))
+    script_root = os.path.dirname(os.path.abspath(__file__))
+    target_dir = os.path.join(script_root, "bin")
+    os.makedirs(target_dir, exist_ok=True)
     install_nm3u8(target_dir)
     check_streamlink()
     print("\n" + "=" * 72)

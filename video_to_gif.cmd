@@ -14,8 +14,16 @@ set "ffprobe=C:\ffmpeg\bin\ffprobe.exe"
 :: END CONFIGURATION SECTION
 :: ========================================================================
 
-:: Auto-detect ffmpeg if not found at configured location
-if not exist "%ffmpeg%" (
+:: Auto-detect ffmpeg (prioritizing portable .\bin\)
+if exist "%scriptDir%bin\ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%bin\ffmpeg.exe"
+) else if exist "%scriptDir%bin\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%bin\ffmpeg\bin\ffmpeg.exe"
+) else if exist "%scriptDir%ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%ffmpeg.exe"
+) else if exist "C:\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpeg=C:\ffmpeg\bin\ffmpeg.exe"
+) else (
     where ffmpeg >nul 2>&1
     if !errorlevel! equ 0 (
         set "ffmpeg=ffmpeg"
@@ -23,8 +31,6 @@ if not exist "%ffmpeg%" (
         set "ffmpeg=C:\Program Files\ffmpeg\bin\ffmpeg.exe"
     ) else if exist "%USERPROFILE%\ffmpeg\bin\ffmpeg.exe" (
         set "ffmpeg=%USERPROFILE%\ffmpeg\bin\ffmpeg.exe"
-    ) else if exist "%scriptDir%ffmpeg.exe" (
-        set "ffmpeg=%scriptDir%ffmpeg.exe"
     ) else (
         echo.
         echo ERROR: ffmpeg.exe not found!
@@ -35,8 +41,16 @@ if not exist "%ffmpeg%" (
     )
 )
 
-:: Auto-detect ffprobe
-if not exist "%ffprobe%" (
+:: Auto-detect ffprobe (prioritizing portable .\bin\)
+if exist "%scriptDir%bin\ffprobe.exe" (
+    set "ffprobe=%scriptDir%bin\ffprobe.exe"
+) else if exist "%scriptDir%bin\ffmpeg\bin\ffprobe.exe" (
+    set "ffprobe=%scriptDir%bin\ffmpeg\bin\ffprobe.exe"
+) else if exist "%scriptDir%ffprobe.exe" (
+    set "ffprobe=%scriptDir%ffprobe.exe"
+) else if exist "C:\ffmpeg\bin\ffprobe.exe" (
+    set "ffprobe=C:\ffmpeg\bin\ffprobe.exe"
+) else (
     where ffprobe >nul 2>&1
     if !errorlevel! equ 0 (
         set "ffprobe=ffprobe"
@@ -44,8 +58,6 @@ if not exist "%ffprobe%" (
         set "ffprobe=C:\Program Files\ffmpeg\bin\ffprobe.exe"
     ) else if exist "%USERPROFILE%\ffmpeg\bin\ffprobe.exe" (
         set "ffprobe=%USERPROFILE%\ffmpeg\bin\ffprobe.exe"
-    ) else if exist "%scriptDir%ffprobe.exe" (
-        set "ffprobe=%scriptDir%ffprobe.exe"
     ) else (
         set "ffprobe="
     )

@@ -38,7 +38,11 @@ def find_binary(binary_name, custom_path=None):
         if os.path.isfile(candidate):
             return candidate
 
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     common_paths = [
+        os.path.join(script_dir, "bin", f"{binary_name}.exe" if sys.platform == "win32" else binary_name),
+        os.path.join(script_dir, "bin", "ffmpeg", "bin", f"{binary_name}.exe" if sys.platform == "win32" else binary_name),
+        os.path.join(script_dir, f"{binary_name}.exe" if sys.platform == "win32" else binary_name),
         rf"C:\ffmpeg\bin\{binary_name}.exe",
         rf"C:\Program Files\ffmpeg\bin\{binary_name}.exe",
         os.path.expanduser(rf"~\ffmpeg\bin\{binary_name}.exe")

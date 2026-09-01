@@ -27,37 +27,31 @@ set "AUDIO_BITRATE=192k"     :: Audio quality (e.g., 128k, 192k, 256k)
 :: END CONFIGURATION SECTION
 :: ========================================================================
 
-set "processedTempDir=%tempDir%\processed_inputs"
+set "scriptDir=%~dp0"
+set "processedTempDir=%TEMP%\video_joiner_%RANDOM%"
 
-:: Auto-detect ffmpeg if not found at the configured location
-if not exist "%ffmpeg%" (
-    echo INFO: ffmpeg not found at "%ffmpeg%"
-    echo Attempting to auto-detect ffmpeg...
-    
-    :: Check if ffmpeg is in PATH
+:: Auto-detect ffmpeg (prioritizing portable .\bin\)
+if exist "%scriptDir%bin\ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%bin\ffmpeg.exe"
+) else if exist "%scriptDir%bin\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%bin\ffmpeg\bin\ffmpeg.exe"
+) else if exist "%scriptDir%ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%ffmpeg.exe"
+) else if exist "C:\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpeg=C:\ffmpeg\bin\ffmpeg.exe"
+) else (
     where ffmpeg >nul 2>&1
     if !errorlevel! equ 0 (
         set "ffmpeg=ffmpeg"
-        echo SUCCESS: Found ffmpeg in system PATH
+    ) else if exist "C:\Program Files\ffmpeg\bin\ffmpeg.exe" (
+        set "ffmpeg=C:\Program Files\ffmpeg\bin\ffmpeg.exe"
+    ) else if exist "%USERPROFILE%\ffmpeg\bin\ffmpeg.exe" (
+        set "ffmpeg=%USERPROFILE%\ffmpeg\bin\ffmpeg.exe"
     ) else (
-        :: Check common installation locations
-        if exist "C:\Program Files\ffmpeg\bin\ffmpeg.exe" (
-            set "ffmpeg=C:\Program Files\ffmpeg\bin\ffmpeg.exe"
-            echo SUCCESS: Found ffmpeg at C:\Program Files\ffmpeg\bin\ffmpeg.exe
-        ) else if exist "%USERPROFILE%\ffmpeg\bin\ffmpeg.exe" (
-            set "ffmpeg=%USERPROFILE%\ffmpeg\bin\ffmpeg.exe"
-            echo SUCCESS: Found ffmpeg at %USERPROFILE%\ffmpeg\bin\ffmpeg.exe
-        ) else (
-            echo ERROR: ffmpeg not found!
-            echo.
-            echo Please install ffmpeg and either:
-            echo   1. Add it to your system PATH, or
-            echo   2. Update the ffmpeg path in this script's CONFIGURATION SECTION
-            echo.
-            echo Download ffmpeg from: https://ffmpeg.org/download.html
-            pause
-            exit /b
-        )
+        echo ERROR: ffmpeg.exe not found!
+        echo Please install ffmpeg or run update_ffmpeg.bat.
+        pause
+        exit /b
     )
 )
 

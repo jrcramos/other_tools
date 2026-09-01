@@ -13,8 +13,16 @@ set "ffmpeg=C:\ffmpeg\bin\ffmpeg.exe"
 :: END CONFIGURATION SECTION
 :: ========================================================================
 
-:: Auto-detect ffmpeg if not found at configured location
-if not exist "%ffmpeg%" (
+:: Auto-detect ffmpeg (prioritizing portable .\bin\)
+if exist "%scriptDir%bin\ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%bin\ffmpeg.exe"
+) else if exist "%scriptDir%bin\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%bin\ffmpeg\bin\ffmpeg.exe"
+) else if exist "%scriptDir%ffmpeg.exe" (
+    set "ffmpeg=%scriptDir%ffmpeg.exe"
+) else if exist "C:\ffmpeg\bin\ffmpeg.exe" (
+    set "ffmpeg=C:\ffmpeg\bin\ffmpeg.exe"
+) else (
     where ffmpeg >nul 2>&1
     if !errorlevel! equ 0 (
         set "ffmpeg=ffmpeg"
@@ -24,7 +32,7 @@ if not exist "%ffmpeg%" (
         set "ffmpeg=%USERPROFILE%\ffmpeg\bin\ffmpeg.exe"
     ) else (
         echo ERROR: ffmpeg.exe not found!
-        echo Please install ffmpeg or update the path in this script.
+        echo Please install ffmpeg or run update_ffmpeg.bat.
         pause
         exit /b
     )
